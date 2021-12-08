@@ -388,7 +388,7 @@ app = Flask(__name__)
 api = Api(app)
 
 
-@app.route(‘/’)
+@app.route('/')
 def index():
    return "check opencv"
 
