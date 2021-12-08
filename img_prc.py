@@ -384,8 +384,10 @@ from werkzeug.utils import secure_filename
 import pandas as pd
 import ast
 
-app = Flask(__name__)
+app = Flask(__name__, static_url_path="/static")
 api = Api(app)
+
+
 
 
 # In[171]:
