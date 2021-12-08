@@ -423,8 +423,9 @@ api.add_resource(UploadImage, '/api')
 
 # In[174]:
 
+if __name__ == "__main__":
+  app.run()
 
-app.run()
 
 
 # In[ ]:
