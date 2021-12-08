@@ -446,7 +446,8 @@ class UploadImage(Resource):
 
 api.add_resource(UploadImage, '/api')
 
-
+if __name__ == "__main__":
+    app.run()
 # In[174]:
 
 
