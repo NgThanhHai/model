@@ -100,7 +100,7 @@ def thresh_img(image):
 
 
 def retr_codetest_id(code_test_img):
-    code_id = []
+    code_id = {}
     
     code_test_img = cv2.cvtColor(code_test_img, cv2.COLOR_BGR2GRAY)
     code_test_img = cv2.threshold(code_test_img, 0, 255, cv2.THRESH_BINARY_INV | cv2.THRESH_OTSU)[1]
@@ -121,7 +121,7 @@ def retr_codetest_id(code_test_img):
             if curr_nonz > max_nonz:
                 filled_idx = j
                 max_nonz = curr_nonz    
-        code_id.append((i + 1, filled_idx))
+        code_id[str(i + 1)] = filled_idx
     return code_id
 
 
@@ -129,7 +129,7 @@ def retr_codetest_id(code_test_img):
 
 
 def retr_student_id(student_id_img):
-    student_id = []
+    student_id = {}
     
     student_id_img = cv2.cvtColor(student_id_img, cv2.COLOR_BGR2GRAY)
     student_id_img = cv2.threshold(student_id_img, 0, 255, cv2.THRESH_BINARY_INV | cv2.THRESH_OTSU)[1]
@@ -150,7 +150,7 @@ def retr_student_id(student_id_img):
             if curr_nonz > max_nonz:
                 filled_idx = j
                 max_nonz = curr_nonz    
-        student_id.append((i + 1, filled_idx))
+        student_id[str(i + 1)] = filled_idx
     return student_id
 
 
@@ -171,11 +171,13 @@ def get_choice(argument):
 
 
 def get_answer(answer_list):
-    key_gen = []
+    key_gen = {}
     
     for i, ans in enumerate(answer_list):
         ans = cv2.cvtColor(ans, cv2.COLOR_BGR2GRAY)
         ans = cv2.threshold(ans, 0, 255, cv2.THRESH_BINARY_INV | cv2.THRESH_OTSU)[1]
+        
+        arr_choice = []
         
 #         show_img(ans)
         bubble_row = np.array_split(ans, 5, 1)
@@ -192,7 +194,9 @@ def get_answer(answer_list):
                 max_nonz = curr_nonz
                 
         choice = get_choice(filled_idx)
-        key_gen.append((i + 1, choice))
+        
+        arr_choice.append(choice)
+        key_gen[str(i + 1)] = arr_choice
     return key_gen
 
 
@@ -386,11 +390,6 @@ import ast
 
 app = Flask(__name__)
 api = Api(app)
-
-
-@app.route('/')
-def index():
-   return "check opencv"
 
 
 class UploadImage(Resource):
