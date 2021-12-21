@@ -380,6 +380,8 @@ def retrInfo(org_img):
 
 
 from flask import Flask, request, redirect, jsonify
+import urllib
+import numpy as np
 
 from functools import wraps
 from flask_restful import Resource, Api, reqparse
@@ -391,20 +393,33 @@ import ast
 app = Flask(__name__)
 api = Api(app)
 
+def url_to_image(url):
+    # download the image, convert it to a NumPy array, and then read
+    # it into OpenCV format
+    resp = urllib.request.urlopen(url)
+    image = np.asarray(bytearray(resp.read()), dtype="uint8")
+    image = cv2.imdecode(image, cv2.IMREAD_COLOR)
+    # return the image
+    return image
 
 class UploadImage(Resource):
     def post(self):
         result = []
-        parse = reqparse.RequestParser()
-        parse.add_argument('image', type=werkzeug.datastructures.FileStorage, location='files')
-        args = parse.parse_args()
-        image_file = args.get("image")
+        # parse = reqparse.RequestParser()
+        # parse.add_argument('image', type=werkzeug.datastructures.FileStorage, location='files')
+        # args = parse.parse_args()
+        # image_file = args.get("image")
         
-        if image_file is not None:
-            filename = secure_filename(image_file.filename)
-            image_file.save(filename)
-            image = cv2.imread(filename)
-            result = retrInfo(image)
+        # if image_file is not None:
+        #     filename = secure_filename(image_file.filename)
+        #     image_file.save(filename)
+        #     image = cv2.imread(filename)
+        #     result = retrInfo(image)
+
+        url = request.args.get('url')
+#         print(url)
+        image = url_to_image(url)
+        result = retrInfo(image)
         return result
 
 
