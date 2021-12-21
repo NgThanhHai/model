@@ -380,7 +380,7 @@ def retrInfo(org_img):
 
 
 from flask import Flask, request, redirect, jsonify
-import urllib
+import urllib.request
 import numpy as np
 
 from functools import wraps

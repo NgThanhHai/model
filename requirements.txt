@@ -6,4 +6,3 @@ pandas==0.25.1
 Werkzeug==2.0.2
 opencv-python-headless
 gunicorn==19.7.1
-urllib==3.8
