@@ -121,7 +121,7 @@ def retr_codetest_id(code_test_img):
             if curr_nonz > max_nonz:
                 filled_idx = j
                 max_nonz = curr_nonz    
-        code_id[str(i + 1)] = filled_idx
+        code_id[str(i + 1)] = str(filled_idx)
     return code_id
 
 
@@ -150,7 +150,7 @@ def retr_student_id(student_id_img):
             if curr_nonz > max_nonz:
                 filled_idx = j
                 max_nonz = curr_nonz    
-        student_id[str(i + 1)] = filled_idx
+        student_id[str(i + 1)] = str(filled_idx)
     return student_id
 
 
@@ -241,7 +241,7 @@ def retr_choice(sorted_ans_blocks):
 def retrInfo(org_img):
     # find contours in the edge map, then initialize
     # the contour that corresponds to the document
-    result = []
+    result = {}
     image = org_img.copy()
     
     thresh = thresh_img(image)
@@ -279,33 +279,39 @@ def retrInfo(org_img):
         
         key_gen = retr_choice(sorted_ans_blocks)
         
-        for k in key_gen:
-            print(k)
-        
         x,y,w,h = cv2.boundingRect(student_id_coor)
         student_id_img = image[y:y + h, x:x + w]
         
 #         show_img(student_id_img)
         student_id_block = retr_student_id(student_id_img)
-
-        print('---student id------')
-        for num in student_id_block:
-            print(num)
-
             
         x,y,w,h = cv2.boundingRect(code_test_coor)
         code_test_img = image[y:y + h, x:x + w]
 #         show_img(code_test_img)
         
         code_id = retr_codetest_id(code_test_img)
-
-        print('---code test id------')
-        for num in code_id:
-            print(num)
     
-    result.append(key_gen)
-    result.append(student_id_block)
-    result.append(code_id)
+    if all(value != "blank" and value != "illegal" for value in student_id_block.values()):
+        student_str = student_id_block.values()
+        student_str = ''.join(student_str)
+    else:
+        student_str = "null"
+    
+    
+    if all(value != "blank" and value != "illegal" for value in code_id.values()):
+        code_str = code_id.values()
+        code_str = ''.join(code_str)
+    else:
+        code_str = "null"
+    
+    
+    
+    result['answer'] = key_gen
+    result['student_id'] = student_str
+    result['code_id'] = code_str
+#     result.append(key_gen)
+#     result.append(student_id_block)
+#     result.append(code_id)
     return result
 
 
@@ -382,6 +388,7 @@ def retrInfo(org_img):
 from flask import Flask, request, redirect, jsonify
 import urllib.request
 import numpy as np
+import json
 
 from functools import wraps
 from flask_restful import Resource, Api, reqparse
@@ -404,23 +411,15 @@ def url_to_image(url):
 
 class UploadImage(Resource):
     def post(self):
-        result = []
-        # parse = reqparse.RequestParser()
-        # parse.add_argument('image', type=werkzeug.datastructures.FileStorage, location='files')
-        # args = parse.parse_args()
-        # image_file = args.get("image")
-        
-        # if image_file is not None:
-        #     filename = secure_filename(image_file.filename)
-        #     image_file.save(filename)
-        #     image = cv2.imread(filename)
-        #     result = retrInfo(image)
-
-        url = request.args.get('url')
-#         print(url)
-        image = url_to_image(url)
+        result = {}
+        url = request.get_data()
+        url_js = json.loads(url)
+#         print(url_js)
+        image = url_to_image(url_js['url'])
         result = retrInfo(image)
-        return result
+        
+        url_js['result'] = result
+        return url_js
 
 
 # In[173]:
