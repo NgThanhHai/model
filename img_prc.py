@@ -538,8 +538,10 @@ import werkzeug
 from werkzeug.utils import secure_filename
 import pandas as pd
 import ast
+from flask_cors import CORS
 
 app = Flask(__name__)
+CORS(app)
 api = Api(app)
 
 
