@@ -7,6 +7,6 @@ Werkzeug==2.0.2
 opencv-python-headless
 #tensorflow-cpu==2.7.0
 tensorflow==2.0.1
-keras==2.7.0
+keras==2.0.1
 flask_cors==3.0.10
 gunicorn==19.7.1
