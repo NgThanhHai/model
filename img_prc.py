@@ -431,24 +431,26 @@ def retrInfo(org_img):
         
         code_id = retr_codetest_id(code_test_img)
     
-#     if all(value != "blank" and value != "illegal" for value in student_id_block.values()):
-#         student_str = student_id_block.values()
-#         student_str = ''.join(student_str)
-#     else:
-#         student_str = "null"
+        student_str = ''
+        for value in student_id_block.values():
+            if value == 'blank' or value == 'illegal':
+                student_str += '-'
+            else: 
+                student_str += str(value[0])
+                
+        code_str = ''
+        for value in code_id.values():
+            if value == 'blank' or value == 'illegal':
+                code_str += '-'
+            else: 
+                code_str += str(value[0])
     
-    
-#     if all(value != "blank" and value != "illegal" for value in code_id.values()):
-#         code_str = code_id.values()
-#         code_str = ''.join(code_str)
-#     else:
-#         code_str = "null"
     
     
     
     result['answer'] = key_gen
-    result['student_id'] = student_id_block
-    result['code_id'] = code_id
+    result['student_id'] = student_str
+    result['code_id'] = code_str
 #     result.append(key_gen)
 #     result.append(student_id_block)
 #     result.append(code_id)
