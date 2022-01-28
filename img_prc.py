@@ -567,12 +567,18 @@ def url_to_image(url):
 
 class UploadImage(Resource):
     def post(self):
-        result = {}
+        result = []
+        tmp_result = {}
         url = request.get_data()
         url_js = json.loads(url)
-#         print(url_js)
-        image = url_to_image(url_js['url'])
-        result = retrInfo(image)
+#         print('data sending : ' + str(url_js))
+
+        list_url = url_js['url']
+    
+        for url in list_url:
+            image = url_to_image(url)
+            tmp_result = retrInfo(image)
+            result.append(tmp_result)
         
         url_js['result'] = result
         return url_js
