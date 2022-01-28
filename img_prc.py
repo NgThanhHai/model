@@ -541,7 +541,7 @@ import ast
 from flask_cors import CORS
 
 app = Flask(__name__)
-CORS(app)
+CORS(app, resources={r"/api/*": {"origins": "*"}})
 api = Api(app)
 
 
