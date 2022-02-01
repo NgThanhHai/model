@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-# In[63]:
+# In[1]:
 
 
 # import the necessary packages
@@ -12,22 +12,10 @@ import imutils
 import cv2
 import os
 import time
-from multiprocessing import Pool
-
-
+import string
+import random
+import multiprocessing as mp
 from keras.models import load_model
-
-
-# In[64]:
-
-
-# import sys
-# sys.path.append("E:\Python 3.7\Lib\site-packages")
-# print(sys.path)
-
-
-# In[65]:
-
 
 model = load_model('weight.h5')
 model.compile(loss='binary_crossentropy',
@@ -35,7 +23,34 @@ model.compile(loss='binary_crossentropy',
               metrics=['accuracy'])
 
 
-# In[66]:
+# In[ ]:
+
+
+
+
+
+# In[ ]:
+
+
+
+
+
+# In[2]:
+
+
+font = cv2.FONT_HERSHEY_SIMPLEX
+fontScale = 0.5
+fontColor = (255, 0, 0)
+lineType = 1
+
+
+# In[ ]:
+
+
+
+
+
+# In[3]:
 
 
 def get_xval(answer): # dạng của s (image, [x, y, w, h])
@@ -61,7 +76,7 @@ def show_resized_img(img, width, height):
     cv2.waitKey(0)
 
 
-# In[67]:
+# In[4]:
 
 
 def resize_img_data(img):
@@ -77,7 +92,7 @@ def resize_img_data(img):
 
 
 
-# In[68]:
+# In[5]:
 
 
 def thresh_img(image):
@@ -110,12 +125,10 @@ def thresh_img(image):
     return thresh
 
 
-# In[69]:
+# In[6]:
 
 
 def retr_codetest_id(code_test_img):
-    
-    #new method 27/01/2022
     
     code_id = {}
     
@@ -126,10 +139,14 @@ def retr_codetest_id(code_test_img):
     
     code_test_cols = np.array_split(code_test_img, 3, 1)
 
+#     show_img(code_test_img)
+
+
     for i, cols in enumerate(code_test_cols):
 #         show_img(cols)
 
-
+        
+#         model predict
         filled_idx = []
         choice = []
         
@@ -137,12 +154,17 @@ def retr_codetest_id(code_test_img):
         for j, b in enumerate(code_id_bubble):
             
 
+
             temp_bb = resize_img_data(b.copy())
             classes = model.predict_on_batch(temp_bb)
             classes = list(classes[0])
             
             if(classes[1] > 0.9):
-                filled_idx.append(j)                
+                filled_idx.append(j)
+#             else:
+#                 print('no choice code id')
+#                 print(i + 1 , j + 1)
+#                 show_img(b)
         
         if len(filled_idx) > legal_filled:
             choice = 'illegal'
@@ -152,40 +174,38 @@ def retr_codetest_id(code_test_img):
             choice = filled_idx
             
         code_id[str(i + 1)] = choice
-    
-    
-    #old method
-    
-#     code_id = {}
-    
-#     code_test_img = cv2.cvtColor(code_test_img, cv2.COLOR_BGR2GRAY)
-#     code_test_img = cv2.threshold(code_test_img, 0, 255, cv2.THRESH_BINARY_INV | cv2.THRESH_OTSU)[1]
-    
-#     code_test_cols = np.array_split(code_test_img, 3, 1)
+        
+#         print('code id filled : ' + str(choice))
 
-#     for i, cols in enumerate(code_test_cols):
-# #         show_img(cols)
-
+        
+    
+#         old method
 #         max_nonz = 0
 #         filled_idx = -1
-        
 #         code_id_bubble = np.array_split(cols, 10, 0)
+
 #         for j, b in enumerate(code_id_bubble):
-# #             show_resized_img(b, 250, 250)
-# #             show_img(b)
+
 #             curr_nonz = cv2.countNonZero(b)
+# #             show_img(b)
+
+#             print((i + 1, j + 1, curr_nonz))
+
 #             if curr_nonz > max_nonz:
 #                 filled_idx = j
 #                 max_nonz = curr_nonz    
-#         code_id[str(i + 1)] = str(filled_idx)
+#         code_id[str(i + 1)] = filled_idx
+        
+# #         print('code_id id filled : ' + str(filled_idx))
+        
     return code_id
 
 
-# In[70]:
+# In[7]:
 
 
 def retr_student_id(student_id_img):
-    
+ 
     student_id = {}
     
     legal_filled = 1
@@ -194,6 +214,8 @@ def retr_student_id(student_id_img):
     student_id_img = cv2.cvtColor(student_id_img, cv2.COLOR_BGR2GRAY)
     student_id_img = cv2.threshold(student_id_img, 0, 255, cv2.THRESH_BINARY_INV | cv2.THRESH_OTSU)[1]
     
+#     show_img(student_id_img)
+
     student_id_cols = np.array_split(student_id_img, 6, 1)
     
     for i, cols in enumerate(student_id_cols):
@@ -201,6 +223,8 @@ def retr_student_id(student_id_img):
         
         student_id_bubble = np.array_split(cols, 10, 0)
 
+        
+#         model predict
         filled_idx = []
         choice = []
 
@@ -230,37 +254,40 @@ def retr_student_id(student_id_img):
             choice = filled_idx
             
         student_id[str(i + 1)] = choice
-    
-    
-    
-    #old method
-    
-#     student_id = {}
-    
-#     student_id_img = cv2.cvtColor(student_id_img, cv2.COLOR_BGR2GRAY)
-#     student_id_img = cv2.threshold(student_id_img, 0, 255, cv2.THRESH_BINARY_INV | cv2.THRESH_OTSU)[1]
-    
-#     student_id_cols = np.array_split(student_id_img, 6, 1)
-    
-#     for i, cols in enumerate(student_id_cols):
-# #         show_img(cols)
+#         print('student id filled : ' + str(choice))
+
+
+
+#             old method
 
 #         max_nonz = 0
 #         filled_idx = -1
         
 #         student_id_bubble = np.array_split(cols, 10, 0)
 #         for j, b in enumerate(student_id_bubble):
-# #             show_resized_img(b, 250, 250)
-# #             show_img(b)
 #             curr_nonz = cv2.countNonZero(b)
+                
+#             print((i + 1, j + 1, curr_nonz))
+# #             show_img(b)
+
 #             if curr_nonz > max_nonz:
 #                 filled_idx = j
 #                 max_nonz = curr_nonz    
-#         student_id[str(i + 1)] = str(filled_idx)
+#         student_id[str(i + 1)] = filled_idx
+        
+#         print('student id filled : ' + str(filled_idx))
+#         show_img(student_id_bubble[filled_idx])
+
     return student_id
 
 
-# In[71]:
+# In[ ]:
+
+
+
+
+
+# In[8]:
 
 
 def get_choice(argument):
@@ -273,23 +300,27 @@ def get_choice(argument):
     return switcher.get(argument, "blank")
 
 
-# In[72]:
+# In[9]:
 
 
 def get_answer(answer_list):
     
     key_gen = {}
     
-    legal_filled = 1
+    legal_filled = 2
     
     for i, ans in enumerate(answer_list):
         ans = cv2.cvtColor(ans, cv2.COLOR_BGR2GRAY)
         ans = cv2.threshold(ans, 0, 255, cv2.THRESH_BINARY_INV | cv2.THRESH_OTSU)[1]
         
+#         show_img(ans)
+        
         bubble_row = np.array_split(ans, 5, 1)
         bubble_row.pop(0)
         
         
+#         model predict
+
         filled_idx = []
         choice = []
         
@@ -310,43 +341,40 @@ def get_answer(answer_list):
             choice = "blank"
         
         key_gen[str(i + 1)] = choice
-    
-    
-    #old method
-    
-#     key_gen = {}
-    
-#     for i, ans in enumerate(answer_list):
-#         ans = cv2.cvtColor(ans, cv2.COLOR_BGR2GRAY)
-#         ans = cv2.threshold(ans, 0, 255, cv2.THRESH_BINARY_INV | cv2.THRESH_OTSU)[1]
         
+#         print('answer id filled : ' + str(choice))
+
+               
+    
+# cách 2: tìm lựa chọn theo giá trị lớn nhất
+
 #         arr_choice = []
-        
-# #         show_img(ans)
-#         bubble_row = np.array_split(ans, 5, 1)
-#         bubble_row.pop(0)
-        
 #         max_nonz = 0
 #         choice = ''
 #         filled_idx = -1
 #         for j, b in enumerate(bubble_row):
 #             curr_nonz = cv2.countNonZero(b)
+            
+#             print((i + 1, j + 1, curr_nonz))
+            
 # #             show_img(b)
+            
 #             if curr_nonz > max_nonz:
 #                 filled_idx = j
 #                 max_nonz = curr_nonz
                 
 #         choice = get_choice(filled_idx)
-        
+    
 #         arr_choice.append(choice)
 #         key_gen[str(i + 1)] = arr_choice
     return key_gen
 
 
-# In[73]:
+# In[10]:
 
 
 def retr_choice(sorted_ans_blocks):
+    
     #collect answer
     box_distance = 10
 
@@ -378,15 +406,19 @@ def retr_choice(sorted_ans_blocks):
 
 
 
-# In[74]:
+# In[11]:
 
 
 def retrInfo(org_img):
+    result = {}
+    
+#     org_img = cv2.imread(filename)
+
     # find contours in the edge map, then initialize
     # the contour that corresponds to the document
-    result = {}
+
     image = org_img.copy()
-    
+        
     thresh = thresh_img(image)
     cnts = cv2.findContours(thresh.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
     cnts = imutils.grab_contours(cnts)
@@ -422,41 +454,37 @@ def retrInfo(org_img):
         
         key_gen = retr_choice(sorted_ans_blocks)
         
+#         for i in key_gen:
+#             print(i, key_gen[i])
+#         print(key_gen)
+        
         x,y,w,h = cv2.boundingRect(student_id_coor)
         student_id_img = image[y:y + h, x:x + w]
         
 #         show_img(student_id_img)
         student_id_block = retr_student_id(student_id_img)
+
+#         print('---student id------')
+#         for i in student_id_block:
+#             print(i, student_id_block[i])
+#         print(student_id_block)
+
             
         x,y,w,h = cv2.boundingRect(code_test_coor)
         code_test_img = image[y:y + h, x:x + w]
 #         show_img(code_test_img)
         
         code_id = retr_codetest_id(code_test_img)
-    
-        student_str = ''
-        for value in student_id_block.values():
-            if value == 'blank' or value == 'illegal':
-                student_str += '-'
-            else: 
-                student_str += str(value[0])
-                
-        code_str = ''
-        for value in code_id.values():
-            if value == 'blank' or value == 'illegal':
-                code_str += '-'
-            else: 
-                code_str += str(value[0])
-    
-    
-    
-    
-    result['answer'] = key_gen
-    result['student_id'] = student_str
-    result['code_id'] = code_str
-#     result.append(key_gen)
-#     result.append(student_id_block)
-#     result.append(code_id)
+
+#         print('---code test id------')
+#         for i in code_id:
+#             print(i, code_id[i])
+
+
+        result['answer'] = key_gen
+        result['student_id'] = student_id_block
+        result['code_id'] = code_id
+        
     return result
 
 
@@ -484,24 +512,41 @@ def retrInfo(org_img):
 
 
 
-# In[75]:
+# In[12]:
 
 
 # start_time = time.time()
 
 
-# In[76]:
+# In[13]:
 
 
-# for i in range(200):
+
+# for i in range(1):
 #     filename = 'answer_gen/ans_' + str(i + 1) + '.png'
+
+#     filename = 'pic/omr_org_cp3.png'
+#     filename = 'pic/omr_org_cp4.png'
+#     filename = 'pic/omr_test_03.png'
+#     filename = 'pic/omr_org.png'
+
 #     image = cv2.imread(filename)
-    
 #     print('---------------Scanning img ' + str(i + 1) + '--------------------------')
 #     retrInfo(image)
 
 
-# In[77]:
+# In[14]:
+
+
+# pool = mp.Pool(processes=2)
+# results = [pool.apply_async(retrInfo, args=
+#                                 ('answer_gen/ans_' + str(i + 1) + '.png',)) for i in range(5)] # maps function to iterator
+# output = [p.get() for p in results]   # collects and returns the results
+# for r in output:
+#     print(r)   # read tuple elements
+
+
+# In[15]:
 
 
 # print("--- %s seconds ---" % (time.time() - start_time))
@@ -513,116 +558,13 @@ def retrInfo(org_img):
 
 
 
-# In[ ]:
+# In[16]:
 
 
 
 
 
 # In[ ]:
-
-
-
-
-
-# # API 
-
-# In[78]:
-
-
-from flask import Flask, request, redirect, jsonify
-import urllib
-import numpy as np
-import json
-
-from functools import wraps
-from flask_restful import Resource, Api, reqparse
-import pandas as pd 
-
-from multiprocessing import Pool
-import worker
-
-app = Flask(__name__)
-api = Api(app)
-
-
-# In[79]:
-
-
-def url_to_image(url):
-    # download the image, convert it to a NumPy array, and then read
-    # it into OpenCV format
-    resp = urllib.request.urlopen(url)
-    image = np.asarray(bytearray(resp.read()), dtype="uint8")
-    image = cv2.imdecode(image, cv2.IMREAD_COLOR)
-    # return the image
-    return image
-
-
-# In[80]:
-
-
-# app.url_map
-
-
-# In[81]:
-
-
-class UploadImage(Resource):
-    def post(self):
-        result = {}
-        url = request.get_data()
-        url_js = json.loads(url)
-#         print('data sending : ' + str(url_js))
-
-#         image = url_to_image(url_js['url'])
-#         result = retrInfo(image)
-#         url_js['result'] = result
-
-        arr_url = (url_js['url'])
-        
-        arr_img = []
-        
-        for url in arr_url:
-            arr_img.append(url_to_image(url))
-                           
-        num_processors = 4
-        p = Pool(processes = num_processors)
-        results = [p.apply_async(worker.retrInfo, args=(img,)) for img in arr_img]
-        output = [p.get() for p in results]
-        
-        
-        url_js['result'] = output
-        return url_js
-
-
-# In[82]:
-
-
-api.add_resource(UploadImage, '/api')
-
-
-# In[83]:
-
-if __name__ == '__main__':
-    app.run()
-
-
-
-# In[ ]:
-
-
-
-
-
-# In[ ]:
-
-
-
-
-
-# In[ ]:
-
 
 
 
