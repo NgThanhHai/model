@@ -5,8 +5,10 @@
 
 
 # import the necessary packages
-#from imutils.perspective import four_point_transform
+from imutils.perspective import four_point_transform
 from imutils import contours
+from math import ceil
+from matplotlib import pyplot as plt
 import numpy as np
 import imutils
 import cv2

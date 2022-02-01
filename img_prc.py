@@ -540,6 +540,7 @@ from flask_restful import Resource, Api, reqparse
 import pandas as pd 
 
 from multiprocessing import Pool
+import threading
 import worker
 
 app = Flask(__name__)
@@ -558,14 +559,8 @@ def url_to_image(url):
     # return the image
     return image
 
-
-# In[80]:
-
-
-# app.url_map
-
-
-# In[81]:
+def func_thread(image, out):
+    out.append(worker.retrInfo(image))
 
 
 class UploadImage(Resource):
@@ -585,14 +580,33 @@ class UploadImage(Resource):
         
         for url in arr_url:
             arr_img.append(url_to_image(url))
-                           
-        num_processors = 4
-        p = Pool(processes = num_processors)
-        results = [p.apply_async(worker.retrInfo, args=(img,)) for img in arr_img]
-        output = [p.get() for p in results]
+            
+            
+#         multiprocessing
+
+#         num_processors = 4
+#         p = Pool(processes = num_processors)
+#         results = [p.apply_async(worker.retrInfo, args=(img,)) for img in arr_img]
+#         output = [p.get() for p in results]
+#         url_js['result'] = output
         
+    
+    
+        #multithread
+        thread_list = []
+        results = []
         
-        url_js['result'] = output
+        for img in arr_img:
+            thread = threading.Thread(target=func_thread, args=(img, results))
+            thread_list.append(thread)
+            
+            
+        for thread in thread_list:
+            thread.start()
+        for thread in thread_list:
+            thread.join()
+                
+        url_js['result'] = result
         return url_js
 
 
