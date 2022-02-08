@@ -605,8 +605,8 @@ class UploadImage(Resource):
             thread.start()
         for thread in thread_list:
             thread.join()
-                
-        url_js['result'] = result
+            
+        url_js['result'] = results
         return url_js
 
 
