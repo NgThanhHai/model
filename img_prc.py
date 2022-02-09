@@ -565,22 +565,26 @@ def func_thread(image, out):
 
 class UploadImage(Resource):
     def post(self):
-        result = {}
+        child_result = {}
+        result  = []
+        
         url = request.get_data()
         url_js = json.loads(url)
-#         print('data sending : ' + str(url_js))
 
-        image = url_to_image(url_js['url'])
-        result = retrInfo(image)
+        arr_url = (url_js['url'])
+        
+        for url in arr_url:
+            image = url_to_image(url)
+            child_result = retrInfo(image)
+            result.append(child_result)
         url_js['result'] = result
 
+
 #         arr_url = (url_js['url'])
-        
 #         arr_img = []
         
 #         for url in arr_url:
-#             arr_img.append(url_to_image(url))
-            
+#             arr_img.append(url_to_image(url))  
             
 #         multiprocessing
 
