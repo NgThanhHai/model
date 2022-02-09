@@ -570,16 +570,16 @@ class UploadImage(Resource):
         url_js = json.loads(url)
 #         print('data sending : ' + str(url_js))
 
-#         image = url_to_image(url_js['url'])
-#         result = retrInfo(image)
-#         url_js['result'] = result
+        image = url_to_image(url_js['url'])
+        result = retrInfo(image)
+        url_js['result'] = result
 
-        arr_url = (url_js['url'])
+#         arr_url = (url_js['url'])
         
-        arr_img = []
+#         arr_img = []
         
-        for url in arr_url:
-            arr_img.append(url_to_image(url))
+#         for url in arr_url:
+#             arr_img.append(url_to_image(url))
             
             
 #         multiprocessing
@@ -593,20 +593,20 @@ class UploadImage(Resource):
     
     
         #multithread
-        thread_list = []
-        results = []
+#         thread_list = []
+#         results = []
         
-        for img in arr_img:
-            thread = threading.Thread(target=func_thread, args=(img, results))
-            thread_list.append(thread)
+#         for img in arr_img:
+#             thread = threading.Thread(target=func_thread, args=(img, results))
+#             thread_list.append(thread)
             
             
-        for thread in thread_list:
-            thread.start()
-        for thread in thread_list:
-            thread.join()
+#         for thread in thread_list:
+#             thread.start()
+#         for thread in thread_list:
+#             thread.join()
             
-        url_js['result'] = results
+#         url_js['result'] = results
         return url_js
 
 
