@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-# In[25]:
+# In[46]:
 
 
 import cv2
@@ -15,7 +15,7 @@ import cv2
 
 # # API 
 
-# In[26]:
+# In[47]:
 
 
 from flask import Flask, request, redirect, jsonify
@@ -38,10 +38,11 @@ from worker import conn
 q = Queue(connection=conn)
 
 app = Flask(__name__)
+
 api = Api(app)
 
 
-# In[27]:
+# In[48]:
 
 
 def url_to_image(url):
@@ -57,33 +58,62 @@ def func_thread(image, out):
     out.append(worker.retrInfo(image))
 
 
-# In[28]:
+# In[49]:
 
 
 # app.url_map
 
 
-# In[29]:
+# In[ ]:
 
 
-class UploadImage(Resource):
-    def post(self):
-        child_result = {}
-        result  = []
-        
-        url = request.get_data()
-        url_js = json.loads(url)
+@app.route('/tasks/<taskID>', methods=['GET'])
+def get_status(taskID):
+    task = q.fetch_job(taskID)
+ 
+    # If such a job exists, return its info
+    if (task):
+        responseObject = {
+            "success": "success",
+            "data": {
+                "taskID": task.get_id(),
+                "taskStatus": task.get_status(),
+                "taskResult": task.result
+            }
+        }
+ 
 
-        arr_url = (url_js['url'])
-        
-        for url in arr_url:
-            image = url_to_image(url)
-            child_result = fst.retrInfo(image)
-            child_result = q.enqueue(fst.retrInfo, image)        
-        
-            result.append(child_result)
-        url_js['result'] = result
+     # Else, return an error
+    else:
+        responseObject = {"status": "error"}
+ 
+    return responseObject 
 
+
+# In[50]:
+
+
+@app.route('/api', methods=['POST'])
+def imgprc():
+    child_result = {}
+    result  = []
+    
+    url = request.get_data()
+    url_js = json.loads(url)
+    arr_url = (url_js['url'])
+    
+    for url in arr_url:
+        image = url_to_image(url)
+#         child_result = fst.retrInfo(image)
+
+        task = q.enqueue(fst.retrInfo, image)
+    
+        responseObject = {"status": "success", "data": {"taskID": task.get_id()}}
+
+#         result.append(child_result)
+
+
+#     url_js['result'] = result
 
 
 #         arr_url = (url_js['url'])
@@ -116,16 +146,99 @@ class UploadImage(Resource):
             
 #         url_js['result'] = results
         
-        return url_js
+#     return url_js
+    return jsonify(responseObject)
 
 
-# In[30]:
+# In[51]:
 
 
-api.add_resource(UploadImage, '/api')
+# class UploadImage(Resource):
+#     def post(self):
+#         child_result = {}
+#         result  = []
+        
+#         url = request.get_data()
+#         url_js = json.loads(url)
+
+#         arr_url = (url_js['url'])
+        
+#         for url in arr_url:
+#             image = url_to_image(url)
+#             child_result = fst.retrInfo(image)
+#             child_result = q.enqueue(fst.retrInfo, image)        
+        
+#             result.append(child_result)
+#         url_js['result'] = result
 
 
-# In[31]:
+
+# #         arr_url = (url_js['url'])
+# #         arr_img = []
+# #         for url in arr_url:
+# #             arr_img.append(url_to_image(url))
+                    
+    
+# #         multiprocessing
+# #         num_processors = 4
+# #         p = Pool(processes = num_processors)
+# #         results = [p.apply_async(worker.retrInfo, args=(img,)) for img in arr_img]
+# #         output = [p.get() for p in results]
+# #         url_js['result'] = output
+        
+    
+#         #multithread
+# #         thread_list = []
+# #         results = []
+        
+# #         for img in arr_img:
+# #             thread = threading.Thread(target=func_thread, args=(img, results))
+# #             thread_list.append(thread)
+            
+            
+# #         for thread in thread_list:
+# #             thread.start()
+# #         for thread in thread_list:
+# #             thread.join()
+            
+# #         url_js['result'] = results
+        
+#         return url_js
+
+
+# In[52]:
+
+
+# class Task(Resource):
+#     def get_status(taskID):
+#     task = q.fetch_job(taskID)
+ 
+
+#     # If such a job exists, return its info
+#     if (task):
+#         responseObject = {
+#             "success": "success",
+#             "data": {
+#                 "taskID": task.get_id(),
+#                 "taskStatus": task.get_status(),
+#                 "taskResult": task.result
+#             }
+#         }
+ 
+#      # Else, return an error
+#     else:
+#         responseObject = {"status": "error"}
+ 
+#     return responseObject 
+
+
+# In[53]:
+
+
+# api.add_resource(UploadImage, '/api')
+
+
+# In[54]:
 
 if __name__ == '__main__':
     app.run()
@@ -137,7 +250,7 @@ if __name__ == '__main__':
 
 
 
-# In[32]:
+# In[55]:
 
 
 # url = []
