@@ -27,18 +27,14 @@ from functools import wraps
 from flask_restful import Resource, Api, reqparse
 import pandas as pd
 
-from multiprocessing import Pool
-import threading
-
 import imgprc.fst as fst
 
-from rq import Queue
-from worker import conn
+# from rq import Queue
+# from worker import conn
 
-q = Queue(connection=conn)
+# q = Queue(connection=conn)
 
 app = Flask(__name__)
-
 api = Api(app)
 
 
@@ -54,17 +50,6 @@ def url_to_image(url):
     # return the image
     return image
 
-def func_thread(image, out):
-    out.append(worker.retrInfo(image))
-
-
-# In[49]:
-
-
-# app.url_map
-
-
-# In[ ]:
 
 
 @app.route('/tasks/<taskID>', methods=['GET'])
@@ -95,26 +80,24 @@ def get_status(taskID):
 
 @app.route('/api', methods=['POST'])
 def imgprc():
-    child_result = {}
-    result  = []
+    result = {}
     
     url = request.get_data()
     url_js = json.loads(url)
-    arr_url = (url_js['url'])
+    url = (url_js['url'])
     
-    for url in arr_url:
-        image = url_to_image(url)
-#         child_result = fst.retrInfo(image)
-
-        task = q.enqueue(fst.retrInfo, image)
+    image = url_to_image(url)
     
-        responseObject = {"status": "success", "data": {"taskID": task.get_id()}}
+    result = fst.retrInfo(image)
+    
+    
+    
+#     task = q.enqueue(fst.retrInfo, image)
+#     responseObject = {"status": "success", "data": {"taskID": task.get_id()}}
+#     return jsonify(responseObject)
 
-#         result.append(child_result)
 
-
-#     url_js['result'] = result
-
+    url_js['result'] = result
 
 #         arr_url = (url_js['url'])
 #         arr_img = []
@@ -146,8 +129,7 @@ def imgprc():
             
 #         url_js['result'] = results
         
-#     return url_js
-    return jsonify(responseObject)
+    return url_js
 
 
 # In[51]:
